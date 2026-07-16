@@ -1,0 +1,15 @@
+# Build output and dependencies
+node_modules
+.next
+out
+build
+coverage
+next-env.d.ts
+package-lock.json
+
+# Prisma migration SQL is generated
+prisma/migrations
+
+# Pre-existing docs kept verbatim (readme.md is rewritten in M7)
+docs/PLAN.md
+readme.md
