@@ -4,13 +4,39 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-**No application code exists yet.** This repo currently contains only `docs/PLAN.md` (the approved implementation plan) and `readme.md` (an old aspirational feature list that predates the plan and does not describe what will actually be built — it gets rewritten in milestone M7). There is no `package.json`, no `src/`, no build/lint/test tooling. Do not treat the README's feature list or tech-stack claims as authoritative; `docs/PLAN.md` is the single source of truth.
+**M0 (Foundation) is complete** — see `docs/PROGRESS.md` for what exists and how it was
+verified. `readme.md` is still the old aspirational feature list that predates the plan
+(rewritten in M7); do not treat it as authoritative. `docs/PLAN.md` is the single source
+of truth.
 
 **Read `docs/PLAN.md` before writing any code.** It is long (~1380 lines) — grep for the relevant section header rather than re-reading it in full each time. Key sections: §5 Prisma data model, §6 API routes, §9 resume parsing pipeline, §10 match-score algorithm, §11 AI schemas/verification, §14 outbox/queue semantics, §16 testing strategy, §18 milestones.
 
-**Work milestone by milestone, in order (M0 → M7, §18 of the plan).** The plan is explicit: "no application code exists yet and none should be written except in service of M0's acceptance criteria." Do not jump ahead to a later milestone's scope (e.g. don't add suggestion generation before matching from M4 exists). Each milestone lists its scope and acceptance criteria explicitly — implement exactly that, then stop.
+**Work milestone by milestone, in order (M0 → M7, §18 of the plan).** Do not jump ahead to a later milestone's scope (e.g. don't add suggestion generation before matching from M4 exists). Each milestone lists its scope and acceptance criteria explicitly — implement exactly that, then stop. Next up: **M1 — Authentication**.
 
-Once M0 lands, this file should be updated with real commands (`npm run dev/lint/typecheck/test/build`, `docker compose up`, how to run a single Vitest/Playwright test) — don't invent them before the tooling exists.
+## Commands
+
+```sh
+docker compose up -d          # local postgres, redis, minio (+ bucket) — dev only
+cp .env.example .env          # compose-matching defaults
+npx prisma migrate dev        # apply migrations (creates client via postinstall too)
+
+npm run dev                   # web app on :3000
+npm run worker:start          # worker process (tsx); worker:dev = watch mode
+npm run lint                  # eslint .
+npm run typecheck             # tsc --noEmit
+npm run format:check          # prettier (format to write)
+npm run test:unit             # vitest, tests/unit (no external deps needed)
+npm run test:integration     # vitest, tests/integration — requires compose services
+npm run build                 # next build — requires env vars set (eager validation)
+
+# single test file / name:
+npx vitest run tests/unit/env.test.ts
+npx vitest run tests/unit -t "kill switch"
+```
+
+Notes: env validation is eager (`src/lib/env.ts` throws at import), so `build`/`start`
+need a valid-looking env — CI supplies dummies in `.github/workflows/ci.yml`. Readiness
+is `GET /api/ready` (per-dependency statuses); liveness is `GET /api/live`.
 
 ## Product shape (from the plan)
 
